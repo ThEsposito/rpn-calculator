@@ -37,11 +37,10 @@ public class Pilha <T> {
 
     public T top() throws PilhaVaziaException {
         if(this.isEmpty()) throw new PilhaVaziaException("Underflow - Estouro de pilha");
-        return arr[top--];
+        return arr[top];
     }
 
-    public int sizeElements() {
+    public int size() {
         return (this.top + 1);
     }
-
 }
