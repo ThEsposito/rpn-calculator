@@ -1,3 +1,5 @@
+import exceptions.VariavelNaoDefinidaException;
+
 public class Variaveis {
     private Double[] values;
 
@@ -11,9 +13,13 @@ public class Variaveis {
         this.values[idx] = valor;
     }
     
-    public double getValor(char var) throws IllegalArgumentException {
+    public double getValor(char var) throws IllegalArgumentException, VariavelNaoDefinidaException {
         int idx = this.getIndex(var);
-
+        if(values[idx] == null) {
+            char[] alfabeto = {'A','B','C','D','E','F','G','H','I','J','K','L',
+                    'M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+            throw new VariavelNaoDefinidaException("Erro: variável "+ alfabeto[idx] + "não definida.");
+        }
         return this.values[idx];
     }
 
@@ -31,13 +37,18 @@ public class Variaveis {
     // Instrução VARS da nossa calculadora
     public String listar(){
         if(this.isEmpty()) return "Nenhuma variável foi atribuída.";
+        char[] alfabeto = {'A','B','C','D','E','F','G','H','I','J','K','L',
+                'M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
 
-        int lista;
-        for(Double value: values){
+        String lista = "";
+
+        for(int i=0; i<values.length; i++){
+            Double value = values[i];
             if(value != null) {
-                System.out.println();
+                lista += alfabeto[i] + " = " + value + '\n';
             }
         }
+        return lista;
     }
 
     private int getIndex(char var) throws IllegalArgumentException {
