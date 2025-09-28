@@ -62,4 +62,8 @@ public class Fila <T>{
     public int size() {
         return qtde;
     }
+
+    public void invert(){
+
+    }
 }
