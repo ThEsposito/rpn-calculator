@@ -18,19 +18,37 @@ import exceptions.OperacaoInvalidaException;
 import exceptions.VariavelNaoDefinidaException;
 
 public class Avaliador {
-    private Variaveis vars;
+    private final Variaveis vars;
 
-    public Avaliador(){
+    public Avaliador() {
         this.vars = new Variaveis();
     }
 
-    public Avaliador(Variaveis vars){
+    public Avaliador(Variaveis vars) {
         this.vars = vars;
     }
 
+
+//    public boolean validarExpressao2(String infixa) {
+//        if(! isBalanceado(infixa)) return false;
+//
+//        /* Falta verificar:
+//        - Variaveis com mais de uma letra
+//        - Tem coerência entre os operadores
+//        */
+//        for(int i=0; i<infixa.length(); i++){
+//            char c = infixa.charAt(i);
+//            if(Character.isWhitespace(c)) continue;
+//            if(Character.isAlphabetic(c)){
+//                if(! vars.existe(c)) return false;
+//            }
+//
+//
+//        }
+//    }
     //AVALIAR ENTRADA INFIXA
     // Irmão, tu acaba de criar o código mais indecifrável do planeta Terra
-    public Boolean validarExpressao(String expressao){
+    public Boolean validarExpressao(String expressao) {
         boolean temOperando = false;
         boolean ultimoFoiOperador = true; //permite negativo no começo da expressão
 
@@ -43,17 +61,17 @@ public class Avaliador {
             return false;
         }
 
-        for(int i = 0; i < expressao.length(); i++){
+        for (int i = 0; i < expressao.length(); i++) {
             char c = expressao.charAt(i);
             if (Character.isWhitespace(c)) continue; // ignora os espaços
-            
-            if(Character.isAlphabetic(c)){
+            // TODO: Dá pra já verificar aqui se esse operando tem valor atribuído!
+            // Retornar falso se não tiver.
+            if (Character.isAlphabetic(c)) {
                 temOperando = true;
                 ultimoFoiOperador = false;
-            }
-            else if (isOperador(c)) {
+            } else if (isOperador(c)) {
                 // dois operadores seguidos
-                if(ultimoFoiOperador && c != '-'){ // permitir sinal negativo no início
+                if (ultimoFoiOperador && c != '-') { // permitir sinal negativo no início
                     return false;
                 }
                 ultimoFoiOperador = true;
@@ -65,53 +83,52 @@ public class Avaliador {
             } else {
                 return false; // caractere inválido
             }
-            
+
             // se o ultimo digitado foi operador, retorna falso
             if (ultimoFoiOperador) return false;
 
             // precisa ter pelo menos um operando
             return temOperando;
         }
-
+        return true;
     }
 
+    public String infixToPosfix(String infix) throws IllegalArgumentException {
+        String result = "";
+        Pilha<Character> p1 = new Pilha<>(infix.length());
 
-public String infixToPosfix(String infix){
-    String result = "";
-    Pilha<Character> p1 = new Pilha<>(infix.length());
+        for (int i = 0; i < infix.length(); i++) {
+            char atual = Character.toUpperCase(infix.charAt(i));
 
-    for (int i = 0; i < infix.length(); i++) {
-        char atual = Character.toUpperCase(infix.charAt(i));
+            if (Character.isWhitespace(atual)) continue; // ignora os espaços
 
-        if (Character.isWhitespace(atual)) continue; // ignora os espaços
-
-        if (Character.isAlphabetic(atual)) {
-            result += atual; // vai direto para saída
-        }
-        else if (isOperador(atual)){
-            while (!p1.isEmpty() && isOperador(p1.top()) &&
-                    getPrioridadeDoOperador(p1.top()) >= getPrioridadeDoOperador(atual)) {
-                result += p1.pop();
+            if (Character.isAlphabetic(atual)) {
+                result += atual; // vai direto para saída
             }
-            p1.push(atual);
-        }
-        else if (atual == '('){
-            p1.push(atual);
-        }
-        else if (atual == ')'){
-            while (!p1.isEmpty() && p1.top() != '(') {
-                result += p1.pop();
+            else if (isOperador(atual)){
+                while (!p1.isEmpty() && isOperador(p1.top()) &&
+                        getPrioridadeDoOperador(p1.top()) >= getPrioridadeDoOperador(atual)) {
+                    result += p1.pop();
+                }
+                p1.push(atual);
             }
-            if (!p1.isEmpty() && p1.top() == '(') {
-                p1.pop(); // descarta o '('
-            } else {
-                throw new IllegalArgumentException("Parêntese desbalanceado!");
+            else if (atual == '('){
+                p1.push(atual);
+            }
+            else if (atual == ')'){
+                while (!p1.isEmpty() && p1.top() != '(') {
+                    result += p1.pop();
+                }
+                if (!p1.isEmpty() && p1.top() == '(') {
+                    p1.pop(); // descarta o '(' que sobrou
+                } else {
+                    throw new IllegalArgumentException("Parêntese desbalanceado!");
+                }
+            }
+            else {
+                throw new IllegalArgumentException("Caractere inválido: " + atual);
             }
         }
-        else {
-            throw new IllegalArgumentException("Caractere inválido: " + atual);
-        }
-    }
 
     // Desempilha o que restou
     while (!p1.isEmpty()){
