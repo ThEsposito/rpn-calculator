@@ -1,16 +1,7 @@
 /*
-Um algoritmo para conversão de uma expressão infixa qualquer para posfixa seria:
-• Inicie com uma pilha vazia;
-• Realize uma varredura na expressão infixa, copiando todos os identificadores encontrados
-diretamente para a expressão de saída.
-a) Ao encontrar um operador:
-1. Enquanto a pilha não estiver vazia e houver no seu topo um operador com prioridade maior
-ou igual ao encontrado, desempilhe o operador e copie-o na saída;
-2. Empilhe o operador encontrado;
-b) Ao encontrar um parêntese de abertura, empilhe-o;
-c) Ao encontrar um parêntese de fechamento, remova um símbolo da pilha e copie-o na saída,
-até que seja desempilhado o parêntese de abertura correspondente.
-• Ao final da varredura, esvazie a pilha, movendo os símbolos desempilhados para a saída.
+Alunos:
+Theo Espósito Simões Resende  RA: 10721356
+Kauê Lima Rodrigues Meneses RA: 10410594
 */
 
 import data.structures.Pilha;
