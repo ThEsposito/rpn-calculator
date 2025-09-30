@@ -18,7 +18,7 @@ public class Variaveis {
         if(values[idx] == null) {
             char[] alfabeto = {'A','B','C','D','E','F','G','H','I','J','K','L',
                     'M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-            throw new VariavelNaoDefinidaException("Erro: variável "+ alfabeto[idx] + "não definida.");
+            throw new VariavelNaoDefinidaException("Erro: variável "+ alfabeto[idx] + " não definida.");
         }
         return this.values[idx];
     }

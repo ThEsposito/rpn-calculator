@@ -28,71 +28,6 @@ public class Avaliador {
         this.vars = vars;
     }
 
-
-//    public boolean validarExpressao2(String infixa) {
-//        if(! isBalanceado(infixa)) return false;
-//
-//        /* Falta verificar:
-//        - Variaveis com mais de uma letra
-//        - Tem coerência entre os operadores
-//        */
-//        for(int i=0; i<infixa.length(); i++){
-//            char c = infixa.charAt(i);
-//            if(Character.isWhitespace(c)) continue;
-//            if(Character.isAlphabetic(c)){
-//                if(! vars.existe(c)) return false;
-//            }
-//
-//
-//        }
-//    }
-    //AVALIAR ENTRADA INFIXA
-    // Irmão, tu acaba de criar o código mais indecifrável do planeta Terra
-    public Boolean validarExpressao(String expressao) {
-        boolean temOperando = false;
-        boolean ultimoFoiOperador = true; //permite negativo no começo da expressão
-
-        if (expressao == null || expressao.isBlank()) { //se a expressão está vazia
-            return false;
-        }
-
-        //valida se os parenteses estão balanceados:
-        if (!isBalanceado(expressao)) {
-            return false;
-        }
-
-        for (int i = 0; i < expressao.length(); i++) {
-            char c = expressao.charAt(i);
-            if (Character.isWhitespace(c)) continue; // ignora os espaços
-            // TODO: Dá pra já verificar aqui se esse operando tem valor atribuído!
-            // Retornar falso se não tiver.
-            if (Character.isAlphabetic(c)) {
-                temOperando = true;
-                ultimoFoiOperador = false;
-            } else if (isOperador(c)) {
-                // dois operadores seguidos
-                if (ultimoFoiOperador && c != '-') { // permitir sinal negativo no início
-                    return false;
-                }
-                ultimoFoiOperador = true;
-            } else if (c == '(') {
-                ultimoFoiOperador = true; // depois de '(' pode vir operador ou operando
-            } else if (c == ')') {
-                if (ultimoFoiOperador) return false; // não pode fechar depois de operador
-                ultimoFoiOperador = false;
-            } else {
-                return false; // caractere inválido
-            }
-
-            // se o ultimo digitado foi operador, retorna falso
-            if (ultimoFoiOperador) return false;
-
-            // precisa ter pelo menos um operando
-            return temOperando;
-        }
-        return true;
-    }
-
     public String infixToPosfix(String infix) throws IllegalArgumentException {
         String result = "";
         Pilha<Character> p1 = new Pilha<>(infix.length());
@@ -139,69 +74,77 @@ public class Avaliador {
 }
 
 
-    // Se não conseguirmos avaliar se todas as variáveis foram definidas antes da expressão,
-    // podemos lançar essa exceção aqui (ou na infixToPosfix).
-    // Pensei em meter o louco e, se a pilha estiver vazia onde não deveris estar, lançar a excecao
-    // falando que a expressao ta invalida ksksksksksksk
-    public Double avaliarPosfix(String posfix) throws VariavelNaoDefinidaException {
-        // Character? Vou precisar empilhar Double tbem????
+    public Double avaliarPosfix(String posfix) throws VariavelNaoDefinidaException, OperacaoInvalidaException {
         Pilha<Double> p = new Pilha<>(posfix.length());
 
         for (int i = 0; i < posfix.length(); i++) {
             Character c = posfix.charAt(i);
+
+            // Ignorar espaços em branco (importante se a expressão vier separada por espaços)
+            if (Character.isWhitespace(c)) continue;
+
             if (Character.isAlphabetic(c)) {
+                // Empilha o valor da variável correspondente
                 p.push(vars.getValor(c));
+
             } else if (isOperador(c)) {
-                double a = p.pop();
-                double b = p.pop();
+                // Atenção: no pós-fixo o primeiro pop é o operando da direita!
+                double right = p.pop();
+                double left  = p.pop();
 
                 double result;
                 // Dá pra reduzir com lambda expressions, mas n lembro a sintaxe
                 switch (c) {
                     case '+':
-                        result = a + b;
+                        result = left + right;
                         break;
                     case '-':
-                        result = a - b;
+                        result = left - right;
                         break;
                     case '*':
-                        result = a * b;
+                        result = left * right;
                         break;
-
-                    // TODO: lembrar de NÃO FAZER DIVISÃO POR ZERO. Validar isso em algum lugar
                     case '/':
-                        result = a / b;
+                        if (right == 0) throw new OperacaoInvalidaException("Não é possível dividir por zero!");
+                        result = left / right;
                         break;
                     case '^':
-                        result = Math.pow(a, b);
+                        result = Math.pow(left, right);
                         break;
                     default:
                         throw new OperacaoInvalidaException("Não é possível realizar a operação '" + c + "'!");
                 }
 
                 p.push(result);
+            } else {
+                // Caso seja um caractere inesperado
+                throw new OperacaoInvalidaException("Caractere inválido encontrado: '" + c + "'");
             }
         }
-        if(p.size() == 1) return p.pop();
-        else throw new RuntimeException("Erro inesperado!! Era pro último elemento da pilha ser o resultado! \nA operação pode ser inválida!: "+posfix);
+
+        // No final, deve restar apenas UM elemento na pilha, que é o resultado
+        if (p.size() == 1) return p.pop();
+        else throw new RuntimeException(
+                "Erro inesperado!! Era pro último elemento da pilha ser o resultado! \nA operação pode ser inválida!: " + posfix
+        );
     }
+
 
     public static boolean isBalanceado(String expressao) {
         Pilha<Character> p = new Pilha<>(expressao.length());
 
-        for(int i=0; i<expressao.length(); i++){
+        for (int i = 0; i < expressao.length(); i++) {
             char c = expressao.charAt(i);
-
-            if(c == '(') p.push(c);
-            else if(c == ')'){
-                if(p.isEmpty()) return false;
-                else p.pop();
-            } else {
-                return false;
+            if (c == '(') p.push(c);
+            else if (c == ')') {
+                if (p.isEmpty()) return false;
+                p.pop();
             }
+            // outros caracteres são ignorados
         }
         return p.isEmpty();
     }
+
 
     private boolean isOperador(char c){
         char[] operadores = {'+','-', '*','/', '^'};
